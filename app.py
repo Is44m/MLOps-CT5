@@ -9,7 +9,7 @@ weights = np.load('model_weights.npy')
 # Define the softmax function for multi-class classification
 def softmax(z):
     exp_z = np.exp(z - np.max(z))  # Subtract max for numerical stability
-    return exp_z / exp_z.sum(axis=0)
+    return exp_z / exp_z.sum(axis=1, keepdims=True)  # Perform softmax row-wise
 
 # Route to display the homepage with the form
 @app.route('/')
@@ -27,12 +27,12 @@ def predict():
         petal_width = float(request.form['petal_width'])
         
         # Create the input array for the model (Adding 1 for intercept term)
-        input_features = np.array([1, sepal_length, sepal_width, petal_length, petal_width])
+        input_features = np.array([1, sepal_length, sepal_width, petal_length, petal_width]).reshape(1, -1)
         
         # Make prediction using softmax for multi-class classification
         logits = np.dot(input_features, weights.T)  # weights.T for (num_classes x num_features)
         probabilities = softmax(logits)
-        predicted_class = np.argmax(probabilities)
+        predicted_class = np.argmax(probabilities, axis=1)[0]  # Get the predicted class
         
         # Map the numeric prediction to the corresponding Iris species
         iris_classes = ['Setosa', 'Versicolor', 'Virginica']
