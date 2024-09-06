@@ -34,7 +34,7 @@ def predict():
         input_features = np.array([1, sepal_length, sepal_width, petal_length, petal_width])  # Adding 1 for intercept term
         
         # Make prediction using softmax for multi-class classification
-        logits = np.dot(input_features, weights.T)  # weights.T for (num_classes x num_features)
+        logits = np.dot(input_features, weights)  # weights.T for (num_classes x num_features)
         probabilities = softmax(logits)
         predicted_class = np.argmax(probabilities)
         
