@@ -1,4 +1,5 @@
 Flask==2.3.2
+joblib
 numpy
 gunicorn==20.1.0
 cython>=0.29.36
