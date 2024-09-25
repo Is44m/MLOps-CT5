@@ -17,10 +17,13 @@ pipeline {
 
         stage('Set up Docker Buildx') {
             steps {
-                // Replace with relevant Windows commands
-                bat '''
-                    docker buildx create --use || exit /B 0
-                '''
+                script {
+                    // Create Docker Buildx builder and set it as the default
+                    def buildxSetup = bat(script: 'docker buildx create --use', returnStatus: true)
+                    if (buildxSetup != 0) {
+                        echo 'Buildx already exists or failed to create. Continuing...'
+                    }
+                }
             }
         }
 
@@ -39,10 +42,12 @@ pipeline {
         stage('Build and push Docker image') {
             steps {
                 script {
-                    bat """
-                        docker build -t %DOCKER_USERNAME%/${IMAGE_NAME}:${DOCKER_TAG} .
-                        docker push %DOCKER_USERNAME%/${IMAGE_NAME}:${DOCKER_TAG}
-                    """
+                    def buildStatus = bat(script: "docker build -t %DOCKER_USERNAME%/${IMAGE_NAME}:${DOCKER_TAG} .", returnStatus: true)
+                    if (buildStatus == 0) {
+                        bat "docker push %DOCKER_USERNAME%/${IMAGE_NAME}:${DOCKER_TAG}"
+                    } else {
+                        error "Docker build failed with status ${buildStatus}"
+                    }
                 }
             }
         }
