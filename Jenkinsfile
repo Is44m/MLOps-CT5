@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_CREDENTIALS_ID = 'docker-credentials' // ID of your Jenkins credentials
-        IMAGE_NAME = 'jenkins-d-image' 
-        DOCKER_TAG = 'latest' 
+        DOCKER_CREDENTIALS_ID = 'docker-credentials'
+        IMAGE_NAME = 'my-docker-image'
+        DOCKER_TAG = 'latest'
     }
 
     stages {
@@ -17,7 +17,10 @@ pipeline {
 
         stage('Set up Docker Buildx') {
             steps {
-                sh 'docker buildx create --use || true'  // Ensure Docker Buildx is available
+                // Replace with relevant Windows commands
+                bat '''
+                    docker buildx create --use || exit /B 0
+                '''
             }
         }
 
@@ -25,8 +28,8 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS_ID, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        sh """
-                        echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+                        bat """
+                            echo %DOCKER_PASSWORD% | docker login -u %DOCKER_USERNAME% --password-stdin
                         """
                     }
                 }
@@ -36,9 +39,9 @@ pipeline {
         stage('Build and push Docker image') {
             steps {
                 script {
-                    sh """
-                    docker build -t $DOCKER_USERNAME/${IMAGE_NAME}:${DOCKER_TAG} .
-                    docker push $DOCKER_USERNAME/${IMAGE_NAME}:${DOCKER_TAG}
+                    bat """
+                        docker build -t %DOCKER_USERNAME%/${IMAGE_NAME}:${DOCKER_TAG} .
+                        docker push %DOCKER_USERNAME%/${IMAGE_NAME}:${DOCKER_TAG}
                     """
                 }
             }
