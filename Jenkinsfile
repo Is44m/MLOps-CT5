@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        label 'ubuntu' // Specify GitHub runner as the agent
+        label 'ubuntu' // Specify GitHub runner as the agent.
     }
 
     environment {
