@@ -1,40 +1,56 @@
 pipeline {
-    agent {
-        label 'ubuntu' // Specify GitHub runner as the agent.
-    }
+    agent any
 
     environment {
-        DOCKER_USERNAME = credentials('docker-username') // Jenkins credentials ID for Docker username
-        DOCKER_PASSWORD = credentials('docker-password') // Jenkins credentials ID for Docker password
+        DOCKER_CREDENTIALS_ID = 'docker-credentials' // ID of your Jenkins credentials
+        IMAGE_NAME = 'jenkins-d-image' 
+        DOCKER_TAG = 'latest' 
     }
 
     stages {
-        stage('Checkout Repository') {
+        stage('Checkout repository') {
             steps {
-                // Checkout the repository
+                // Checkout the Git repository
                 checkout scm
             }
         }
 
         stage('Set up Docker Buildx') {
             steps {
-                sh 'docker run --rm --privileged docker/binfmt:a7996909642ee92942dcd6cff44b9b95f08dad64'
+                sh 'docker buildx create --use || true'  // Ensure Docker Buildx is available
             }
         }
 
         stage('Log in to Docker Hub') {
             steps {
-                sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
+                script {
+                    withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS_ID, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh """
+                        echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+                        """
+                    }
+                }
             }
         }
 
-        stage('Build and Push Docker Image') {
+        stage('Build and push Docker image') {
             steps {
-                sh '''
-                    docker buildx create --use
-                    docker buildx build --platform linux/amd64,linux/arm64 --push -t $DOCKER_USERNAME/my-flask-app:latest .
-                '''
+                script {
+                    sh """
+                    docker build -t $DOCKER_USERNAME/${IMAGE_NAME}:${DOCKER_TAG} .
+                    docker push $DOCKER_USERNAME/${IMAGE_NAME}:${DOCKER_TAG}
+                    """
+                }
             }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline execution completed.'
+        }
+        failure {
+            echo 'Pipeline execution failed.'
         }
     }
 }
