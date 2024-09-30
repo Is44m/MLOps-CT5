@@ -1,0 +1,8 @@
+services:
+  flask-app:
+    image: ${{ secrets.DOCKER_USERNAME }}/my-flask-app:latest
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_APP=app.py
+    command: flask run --host=0.0.0.0

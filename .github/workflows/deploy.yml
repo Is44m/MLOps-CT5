@@ -1,4 +1,4 @@
-name: Dockerize and Push
+name: Dockerize, Push, and Compose
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build-and-push:
+  build-push-and-compose:
     runs-on: ubuntu-latest
 
     steps:
@@ -28,3 +28,7 @@ jobs:
         context: .
         push: true
         tags: ${{ secrets.DOCKER_USERNAME }}/my-flask-app:latest
+
+    - name: Set up Docker Compose
+      run: |
+        docker-compose up -d
