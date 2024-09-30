@@ -1,6 +1,6 @@
 services:
   flask-app:
-    image: ${{ secrets.DOCKER_USERNAME }}/my-flask-app:latest
+    image: "${DOCKER_USERNAME}/CT4-flask-app:latest"
     ports:
       - "5000:5000"
     environment:

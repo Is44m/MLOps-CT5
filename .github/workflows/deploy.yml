@@ -27,7 +27,7 @@ jobs:
       with:
         context: .
         push: true
-        tags: ${{ secrets.DOCKER_USERNAME }}/my-flask-app:latest
+        tags: ${{ secrets.DOCKER_USERNAME }}/CT4-flask-app:latest
 
     - name: Install Docker Compose
       run: |
@@ -36,4 +36,6 @@ jobs:
 
     - name: Run Docker Compose
       run: |
+        echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" > .env
         docker-compose up -d
+      
