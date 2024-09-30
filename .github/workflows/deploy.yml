@@ -1,4 +1,4 @@
-name: Dockerize, Push, and Compose
+name: Dockerize, Push, and Run Compose
 
 on:
   push:
@@ -29,6 +29,11 @@ jobs:
         push: true
         tags: ${{ secrets.DOCKER_USERNAME }}/my-flask-app:latest
 
-    - name: Set up Docker Compose
+    - name: Install Docker Compose
+      run: |
+        sudo apt-get update
+        sudo apt-get install docker-compose -y
+
+    - name: Run Docker Compose
       run: |
         docker-compose up -d
