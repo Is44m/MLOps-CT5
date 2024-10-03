@@ -1,8 +1,30 @@
+version: '3'
 services:
-  flask-app:
-    image: "${DOCKER_USERNAME}/ct4-flask-app:latest"
+  backend:
+    build: ./backend
     ports:
       - "5000:5000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
     environment:
       - FLASK_APP=app.py
     command: flask run --host=0.0.0.0
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+    command: ["nginx", "-g", "daemon off;"]
+
+  db:
+    build: ./db
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+    ports:
+      - "3306:3306"
